@@ -1,0 +1,132 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vigia
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: retrieval
+  namespace: vigia
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: retrieval
+  template:
+    metadata:
+      labels:
+        app: retrieval
+    spec:
+      containers:
+        - name: retrieval
+          image: vigia:local
+          command: ["vigia"]
+          args: ["retrieval"]
+          ports:
+            - containerPort: 8001
+          env:
+            - name: PORT
+              value: "8001"
+            - name: QDRANT_URL
+              value: http://qdrant:6333
+            - name: VIGIA_INGEST_ON_START
+              value: "1"
+            - name: VIGIA_EMBEDDER
+              value: hash
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: retrieval
+  namespace: vigia
+spec:
+  selector:
+    app: retrieval
+  ports:
+    - port: 8001
+      targetPort: 8001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: procedimentos
+  namespace: vigia
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: procedimentos
+  template:
+    metadata:
+      labels:
+        app: procedimentos
+    spec:
+      containers:
+        - name: procedimentos
+          image: vigia:local
+          command: ["vigia"]
+          args: ["procedimentos"]
+          ports:
+            - containerPort: 8002
+          env:
+            - name: PORT
+              value: "8002"
+            - name: RETRIEVAL_URL
+              value: http://retrieval:8001
+            - name: A2A_PUBLIC_URL
+              value: http://procedimentos:8002
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: procedimentos
+  namespace: vigia
+spec:
+  selector:
+    app: procedimentos
+  ports:
+    - port: 8002
+      targetPort: 8002
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agentes
+  namespace: vigia
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agentes
+  template:
+    metadata:
+      labels:
+        app: agentes
+    spec:
+      containers:
+        - name: agentes
+          image: vigia:local
+          command: ["vigia"]
+          args: ["agentes"]
+          ports:
+            - containerPort: 8000
+          env:
+            - name: PORT
+              value: "8000"
+            - name: RETRIEVAL_URL
+              value: http://retrieval:8001
+            - name: A2A_URL
+              value: http://procedimentos:8002
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentes
+  namespace: vigia
+spec:
+  selector:
+    app: agentes
+  ports:
+    - port: 8000
+      targetPort: 8000
