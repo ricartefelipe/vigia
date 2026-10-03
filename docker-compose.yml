@@ -1,0 +1,39 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.13.4
+    ports:
+      - "6333:6333"
+  retrieval:
+    build: .
+    command: ["retrieval"]
+    environment:
+      QDRANT_URL: http://qdrant:6333
+      VIGIA_INGEST_ON_START: "1"
+      VIGIA_EMBEDDER: hash
+      PORT: "8001"
+    ports:
+      - "8001:8001"
+    depends_on:
+      - qdrant
+  procedimentos:
+    build: .
+    command: ["procedimentos"]
+    environment:
+      RETRIEVAL_URL: http://retrieval:8001
+      A2A_PUBLIC_URL: http://localhost:8002
+      PORT: "8002"
+    ports:
+      - "8002:8002"
+    depends_on:
+      - retrieval
+  agentes:
+    build: .
+    command: ["agentes"]
+    environment:
+      RETRIEVAL_URL: http://retrieval:8001
+      A2A_URL: http://procedimentos:8002
+      PORT: "8000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - procedimentos
