@@ -1,0 +1,6 @@
+{"consulta": "Qual documento de identidade é aceito no cadastro?", "esperados": ["norma-kyc-001"], "tipo": "norma"}
+{"consulta": "Em quanto tempo comunicar operação suspeita de lavagem?", "esperados": ["norma-pld-002"], "tipo": "norma"}
+{"consulta": "Qual a margem máxima do crédito consignado?", "esperados": ["norma-credito-003"], "tipo": "norma"}
+{"consulta": "Qual a taxa do cheque especial promocional de 1999?", "esperados": [], "tipo": "norma"}
+{"consulta": "Como contestar uma compra no cartão?", "esperados": ["proc-contestacao-001"], "tipo": "procedimento"}
+{"consulta": "Como abrir uma conta corrente?", "esperados": ["proc-conta-002"], "tipo": "procedimento"}
