@@ -18,6 +18,7 @@ from vigia.orchestrator import Orchestrator
 from vigia.service import RetrievalService
 from vigia.apresentacao import apresentar
 from vigia.sessao import Sessao
+from vigia.web import create_web_app
 from vigia.wiring import avaliar_corpus, carregar_perguntas, memory_service, open_index, responder
 
 
@@ -42,6 +43,9 @@ def main() -> None:
     chat = sub.add_parser("chat")
     chat.add_argument("--corpus", default="corpus")
 
+    web = sub.add_parser("web")
+    web.add_argument("--corpus", default="corpus")
+
     sub.add_parser("retrieval")
     sub.add_parser("procedimentos")
     sub.add_parser("agentes")
@@ -56,6 +60,8 @@ def main() -> None:
         _perguntar(args.pergunta, Path(args.corpus), args.json)
     elif args.cmd == "chat":
         _chat(Path(args.corpus))
+    elif args.cmd == "web":
+        _web(Path(args.corpus))
     elif args.cmd == "retrieval":
         _retrieval()
     elif args.cmd == "procedimentos":
@@ -107,6 +113,13 @@ def _com_memoria(pergunta: str, corpus: Path) -> Resposta:
     resposta = _resolver(efetiva, corpus)
     sessao.registrar(efetiva, resposta)
     return resposta
+
+
+def _web(corpus: Path) -> None:
+    port = int(os.environ.get("PORT", "8080"))
+    sessao = Path(os.environ.get("VIGIA_SESSAO", "data/sessao.json"))
+    uvicorn.run(create_web_app(corpus, sessao), host="0.0.0.0", port=port)
+
 
 def _resolver(pergunta: str, corpus: Path) -> Resposta:
     agentes = os.environ.get("AGENTES_URL")
